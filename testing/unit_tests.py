@@ -12,5 +12,10 @@ class test_utils(unittest.TestCase):
         self.assertFalse(utils.validate_IPv4('256.0.0.0'))
         self.assertFalse(utils.validate_IPv4('h.e.l.o'))
 
+    def test_encrypt_decrypt_int(self):
+        my_rsa = utils.RSA()
+        encrypted = utils.encrypt(my_rsa.N, my_rsa.e, 'hello world')
+        self.assertTrue('hello world', my_rsa.decrypt(encrypted))
+
 if __name__ == '__main__':
     unittest.main()

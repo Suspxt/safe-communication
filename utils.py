@@ -1,5 +1,5 @@
 import random
-
+import binascii
 
 def validate_IPv4(address):
     if isinstance(address, str):
@@ -91,18 +91,15 @@ def egcd(x, y):
         d, a, b = egcd(y, x % y)
         return d, b, a - (x // y) * b
 
-def encrypt_num(N, e, message):
+
+def encrypt(N, e, message):
     """
     Returns the message encrypted by the RSA scheme with public key (N, e).
     """
-    return pow(message, e, N)
+    encoded = int(binascii.hexlify(message.encode('utf-8')), 16)
+    return pow(encoded, e, N)
 
-def encrypt_str(N, e, message):
-    """
-    Returns the message encrypted by the RSA scheme with public key (N, e).
-    """
-    pass
-
+encrypt(123123, 23, 'hello')
 
 class RSA:
 
@@ -118,11 +115,11 @@ class RSA:
         _, self.d, _ = egcd(self.e, coprime)
         self.d %= coprime
 
-    def decrypt_num(self, message):
-        """
-        Returns the decrypted MESSAGE
-        """
-        return pow(message, self.d, self.N)
+    def decrypt(self, message):
+        decrypted = pow(message, self.d, self.N)
+        decrypted = binascii.unhexlify(hex(decrypted)[2:].encode('ascii'))
+        return decrypted.decode('utf-8')
 
     def public_key(self):
         return self.N, self.e
+
