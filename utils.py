@@ -1,49 +1,88 @@
 import random
-import math
+
 
 def validate_IPv4(address):
     if isinstance(address, str):
         vals = address.split('.')
         for str_val in vals:
             try:
-                val = int(val)
+                val = int(str_val)
             except ValueError:
                 return False
             if val > 0 and str_val[0] == '0' \
                or val < 0 or val > 255:
                 return False
-        return vals.len == 4
+        return len(vals) == 4
     return False
+
 
 def request_socket_info():
     tcp_ip = ''
     tcp_port = 0
     while not validate_IPv4(tcp_ip):
-        tcp_ip = input("Enter the IPv4 address, or enter nothing for localhost.") or '127.0.0.1'
+        tcp_ip = input("Enter the IPv4 address, or enter nothing for localhost: ") or '127.0.0.1'
     while tcp_port < 49152 or tcp_port > 65535:
-        tcp_port = input("Enter the TCP port, or enter nothing for 55555") or '55555'
+        tcp_port = input("Enter the TCP port (from 49152 to 65535, exclusive), or enter nothing for 55555: ") or '55555'
         try:
             tcp_port = int(tcp_port)
         except ValueError:
             tcp_port = 0
     return tcp_ip, tcp_port
 
-def generate_prime(lower, upper, exclude=0):
+def is_prime(number, test_count):
     """
-    Generates a random prime between LOWER (inclusive) and UPPER (exclusive), if
-    one exists. Excludes EXCLUDE from being output if necessary. Generates an
-    error if no prime exists within this range. Uses the Sieve of Eratosthenes to
-    make a list of primes then chooses a random one.
+    Uses the Miller-Rabin test for primality to determine, through TEST_COUNT
+    tests, whether or not NUMBER is prime.
     """
-    included = [True for i in range(upper)]
-    prime = 2
-    search_range = math.ceil(upper ** 0.5)
-    while prime <= search_range:
-        if included[prime]:
-            for i in range(prime**2, upper, prime):
-                included[prime] = False
-        prime += 1
-    return random.choice([i for i in range(lower, upper) if included[i] and i != exclude])
+    if number == 2 or number == 3:
+        return True
+    if number <= 1 or number % 2 == 0:
+        return False
+    d = 0
+    r = number - 1
+    while r % 2 == 1:
+        d += 1
+        r //= 2
+    for _1 in range(test_count):
+        a = random.randrange(2, number - 1)
+        x = pow(a, r, number)
+        if x != 1 and x != number - 1:
+            for _2 in range(d):
+                x = (x ** 2) % number
+                if x == 1:
+                    return False
+                if x == number - 1:
+                    break
+            if x != number - 1:
+                return False
+    return True
+
+
+def generate_large_prime(bits, tests):
+    """
+    Generates a very large prime number of BITS bits.
+    """
+    candidate = 0
+    while not is_prime(candidate, tests):
+        candidate = random.randrange(1 + 2 ** (bits - 1), 2 ** bits, 2)
+    return candidate
+
+
+def generate_coprime(lower, upper, value):
+    """
+    Generates a number between LOWER (inclusive) and UPPER (exclusive) that is
+    coprime to VALUE.
+    """
+    coprimes = [i for i in range(lower, upper) if egcd(i, value)[0] == 1]
+    if len(coprimes) == 0:
+        i = upper
+        while True:
+            if egcd(i, value)[0] == 1:
+                return i
+            i += 1
+    return random.choice(coprimes)
+
+
 
 def egcd(x, y):
     if y == 0:
@@ -52,11 +91,18 @@ def egcd(x, y):
         d, a, b = egcd(y, x % y)
         return d, b, a - (x // y) * b
 
-def encrypt(N, e, message):
+def encrypt_num(N, e, message):
     """
     Returns the message encrypted by the RSA scheme with public key (N, e).
     """
-    return (message ** e) % N
+    return pow(message, e, N)
+
+def encrypt_str(N, e, message):
+    """
+    Returns the message encrypted by the RSA scheme with public key (N, e).
+    """
+    pass
+
 
 class RSA:
 
@@ -64,14 +110,19 @@ class RSA:
         """
         Chooses p, q as 15-bit prime numbers
         """
-        self.p = generate_prime(2**15, 2**16)
-        self.q = generate_prime(2**15, 2**16, self.p)
-        self.e = generate_prime(2, 20)
+        self.p = generate_large_prime(512, 512)
+        self.q = generate_large_prime(512, 512)
+        coprime = (self.p - 1) * (self.q - 1)
+        self.e = generate_coprime(2, 100, coprime)
         self.N = self.p * self.q
-        _, self.d, _ = egcd(self.e, (self.p - 1) * (self.q - 1))
+        _, self.d, _ = egcd(self.e, coprime)
+        self.d %= coprime
 
-    def decrypt(self, message):
+    def decrypt_num(self, message):
         """
         Returns the decrypted MESSAGE
         """
-        return (message ** self.d) % self.N
+        return pow(message, self.d, self.N)
+
+    def public_key(self):
+        return self.N, self.e
