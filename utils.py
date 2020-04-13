@@ -83,7 +83,6 @@ def generate_coprime(lower, upper, value):
     return random.choice(coprimes)
 
 
-
 def egcd(x, y):
     if y == 0:
         return x, 1, 0
