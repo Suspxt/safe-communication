@@ -1,2 +1,2 @@
 # safe-communication
- A small chat application between a server and host over TCP that uses RSA to encrypt messages between the server and its clients.
+ A small chat application to allow a client to safely send messages to a server over TCP that uses RSA to encrypt messages.

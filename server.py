@@ -12,13 +12,14 @@ print("IP: ", TCP_IP)
 print("Port: ", TCP_PORT)
 print("Public key: ", str(public_key))
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET for IPV4, SOCK_STREAM for TCP
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
-s.listen(1) # Queue of 1
+s.listen(1)
 
 client_s, address = s.accept()
 print(f"Established connection to {address}.")
 client_s.send(bytes("Connected to server. Public key: " + str(public_key), "utf-8"))
+
 
 def separate_messages(chunk):
     start = chunk.find('[') + 1

@@ -1,7 +1,8 @@
 import unittest
 import utils
 
-class test_utils(unittest.TestCase):
+
+class TestUtils(unittest.TestCase):
     def test_validate(self):
         self.assertTrue(utils.validate_IPv4('127.0.0.1'))
         self.assertTrue(utils.validate_IPv4('255.255.255.255'))
@@ -16,6 +17,7 @@ class test_utils(unittest.TestCase):
         my_rsa = utils.RSA()
         encrypted = utils.encrypt(my_rsa.N, my_rsa.e, 'hello world')
         self.assertTrue('hello world', my_rsa.decrypt(encrypted))
+
 
 if __name__ == '__main__':
     unittest.main()

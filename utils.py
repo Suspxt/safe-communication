@@ -1,6 +1,7 @@
 import random
 import binascii
 
+
 def validate_IPv4(address):
     if isinstance(address, str):
         vals = address.split('.')
@@ -28,6 +29,7 @@ def request_socket_info():
         except ValueError:
             tcp_port = 0
     return tcp_ip, tcp_port
+
 
 def is_prime(number, test_count):
     """
@@ -98,7 +100,6 @@ def encrypt(N, e, message):
     encoded = int(binascii.hexlify(message.encode('utf-8')), 16)
     return pow(encoded, e, N)
 
-encrypt(123123, 23, 'hello')
 
 class RSA:
 
@@ -121,4 +122,3 @@ class RSA:
 
     def public_key(self):
         return self.N, self.e
-
