@@ -1,5 +1,14 @@
 import random
 import binascii
+import socket
+
+
+def separate_messages(chunk):
+    start = chunk.find('[') + 1
+    end = chunk.find(']')
+    if end == -1:
+        return chunk
+    return chunk[start:end], chunk[end + 1:]
 
 
 def validate_IPv4(address):
